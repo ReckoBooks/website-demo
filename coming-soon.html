@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReckoBooks — Coming Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=Cairo:wght@500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#FFFFFF;
+    --surface:#FFFFFF;
+    --ink:#0E2233;
+    --slate:#5B6B7A;
+    --muted:#8A98A6;
+    --placeholder:#9AA8B5;
+    --border:#E3EBF3;
+    --border-2:#DCE6F0;
+    --blue:#1F6FE0;
+    --blue-deep:#1557B8;
+    --green:#16A57F;
+    --green-soft:#E5F6F0;
+    --blue-soft:#EAF1FD;
+    --error:#D14343;
+    --shadow-btn:0 6px 18px rgba(31,111,224,.22);
+    --shadow-card:0 10px 30px rgba(14,34,51,.07);
+    --shadow-pill:0 8px 24px rgba(14,34,51,.08);
+    --wash-blue:rgba(31,111,224,.14);
+    --wash-green:rgba(22,165,127,.13);
+    --illustration-opacity:.45;
+    /* background illustration */
+    --svg-card-top:#FFFFFF;
+    --svg-card-bottom:#F4F8FC;
+    --svg-line:#DCE6F0;
+    --svg-line-soft:#EFF4F9;
+    --font-display:'Sora',sans-serif;
+    --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+
+  /* ============ DARK THEME ============ */
+  html[data-theme="dark"]{
+    color-scheme:dark;
+    --bg:#0B141E;
+    --surface:#142230;
+    --ink:#E9F1F8;
+    --slate:#A9B8C6;
+    --muted:#7E8FA0;
+    --placeholder:#627486;
+    --border:#24364A;
+    --border-2:#2A3D52;
+    --blue:#4D93F2;
+    --blue-deep:#2F6FD0;
+    --green:#2BC096;
+    --green-soft:rgba(43,192,150,.16);
+    --blue-soft:rgba(77,147,242,.16);
+    --error:#F07A7A;
+    --shadow-btn:0 6px 18px rgba(0,0,0,.45);
+    --shadow-card:0 10px 30px rgba(0,0,0,.4);
+    --shadow-pill:0 8px 24px rgba(0,0,0,.45);
+    --wash-blue:rgba(77,147,242,.12);
+    --wash-green:rgba(43,192,150,.10);
+    --illustration-opacity:.3;
+    --svg-card-top:#16242F;
+    --svg-card-bottom:#101C27;
+    --svg-line:#2A3D52;
+    --svg-line-soft:#1D2D3D;
+  }
+
+  /* Arabic font stack — applied when <html dir="rtl"> */
+  html[dir="rtl"]{
+    --font-display:'Cairo',sans-serif;
+    --font-body:'Tajawal','Cairo',system-ui,sans-serif;
+  }
+  html[dir="rtl"] .tagline,
+  html[dir="rtl"] .logo-name{letter-spacing:0}
+  html[dir="rtl"] .badge{letter-spacing:.02em}
+  html[dir="rtl"] .count-label{letter-spacing:.04em}
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:var(--font-body);
+    background:var(--bg);
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+    transition:background-color .3s ease,color .3s ease;
+  }
+
+  /* soft gradient washes */
+  .wash{
+    position:fixed;
+    border-radius:50%;
+    filter:blur(90px);
+    pointer-events:none;
+    z-index:0;
+  }
+  .wash--blue{
+    width:560px;height:560px;
+    background:radial-gradient(circle,var(--wash-blue),transparent 70%);
+    top:-180px;left:-140px;
+  }
+  .wash--green{
+    width:520px;height:520px;
+    background:radial-gradient(circle,var(--wash-green),transparent 70%);
+    bottom:-160px;right:-120px;
+  }
+
+  /* background ledger illustration */
+  .bg-illustration{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    pointer-events:none;
+    opacity:var(--illustration-opacity);
+    transition:opacity .3s ease;
+  }
+  .bg-illustration svg{
+    width:min(880px,96vw);
+    height:auto;
+    transform:translateY(22%);
+  }
+
+  /* top-bar controls (language + theme) */
+  .top-controls{
+    position:fixed;
+    top:20px;
+    inset-inline-end:20px;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  /* language switcher */
+  .lang-switch{
+    display:inline-flex;
+    align-items:center;
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:999px;
+    padding:4px;
+    box-shadow:var(--shadow-pill);
+    transition:background-color .3s ease,border-color .3s ease;
+  }
+  .lang-switch button{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:.88rem;
+    padding:7px 18px;
+    border:none;
+    border-radius:999px;
+    background:transparent;
+    color:var(--slate);
+    cursor:pointer;
+    transition:background .18s ease,color .18s ease;
+  }
+  .lang-switch button.active{
+    background:linear-gradient(135deg,var(--blue) 0%,var(--blue-deep) 100%);
+    color:#fff;
+    box-shadow:0 4px 12px rgba(31,111,224,.25);
+  }
+  .lang-switch button:focus-visible{outline:3px solid rgba(31,111,224,.4);outline-offset:2px}
+
+  /* theme toggle button */
+  .theme-switch{
+    width:44px;height:44px;
+    border-radius:999px;
+    border:1.5px solid var(--border);
+    background:var(--surface);
+    color:var(--slate);
+    box-shadow:var(--shadow-pill);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background-color .3s ease,border-color .3s ease,color .18s ease,transform .18s ease;
+  }
+  .theme-switch:hover{color:var(--blue);transform:translateY(-1px)}
+  .theme-switch:focus-visible{outline:3px solid rgba(31,111,224,.4);outline-offset:2px}
+  .theme-switch svg{width:20px;height:20px}
+  .theme-switch .icon-moon{display:none}
+  html[data-theme="dark"] .theme-switch .icon-sun{display:none}
+  html[data-theme="dark"] .theme-switch .icon-moon{display:block}
+
+  .hero{
+    position:relative;
+    z-index:1;
+    text-align:center;
+    padding:84px 24px 200px;
+    max-width:640px;
+    animation:rise .7s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0;transform:translateY(14px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1}
+    50%{opacity:.55}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .hero{animation:none}
+    .badge-dot{animation:none}
+    .btn{transition:none}
+  }
+
+  /* logo */
+  .logo{
+    display:inline-flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:32px;
+  }
+  .logo-mark{
+    width:48px;height:48px;
+    border-radius:12px;
+    background:linear-gradient(135deg,var(--blue) 0%,var(--green) 100%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(22,165,127,.25);
+  }
+  .logo-mark svg{width:26px;height:26px}
+  .logo-name{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:1.5rem;
+    letter-spacing:-.02em;
+    color:var(--ink);
+  }
+  .logo-name span{color:var(--blue)}
+
+  /* badge */
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--blue-soft);
+    color:var(--blue-deep);
+    font-weight:600;
+    font-size:.82rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:8px 18px;
+    border-radius:999px;
+    margin-bottom:24px;
+    transition:background-color .3s ease,color .3s ease;
+  }
+  html[data-theme="dark"] .badge{color:var(--blue)}
+  .badge-dot{
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--green);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+
+  .tagline{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(2rem,5.4vw,3.1rem);
+    letter-spacing:-.03em;
+    line-height:1.18;
+    margin-bottom:18px;
+  }
+  .tagline .accent{
+    background:linear-gradient(90deg,var(--blue),var(--green));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+
+  /* rotating slogan — typewriter effect */
+  .slogan-rotator{
+    display:inline-block;
+    min-height:1.18em;
+  }
+  .slogan-text{
+    display:inline;
+  }
+  .slogan-cursor{
+    display:inline-block;
+    width:3px;
+    height:.95em;
+    margin-inline-start:4px;
+    vertical-align:-0.08em;
+    border-radius:2px;
+    background:linear-gradient(180deg,var(--blue),var(--green));
+    animation:cursor-blink 1s steps(2,start) infinite;
+  }
+  @keyframes cursor-blink{
+    to{visibility:hidden;}
+  }
+  .description{
+    font-size:1.06rem;
+    line-height:1.75;
+    color:var(--slate);
+    max-width:480px;
+    margin:0 auto 36px;
+  }
+
+  /* countdown — numbers always LTR even in Arabic */
+  .countdown{
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    margin-bottom:40px;
+    flex-wrap:wrap;
+    direction:ltr;
+  }
+  .count-card{
+    background:var(--surface);
+    border:1.5px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow-card);
+    min-width:84px;
+    padding:16px 10px 12px;
+    transition:background-color .3s ease,border-color .3s ease;
+  }
+  .count-num{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:1.8rem;
+    letter-spacing:-.02em;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+  }
+  .count-label{
+    font-family:var(--font-body);
+    font-size:.72rem;
+    font-weight:600;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  /* notify form */
+  .notify{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    max-width:460px;
+    margin:0 auto;
+    flex-wrap:wrap;
+  }
+  .notify input{
+    flex:1;
+    min-width:220px;
+    font-family:var(--font-body);
+    font-size:.98rem;
+    padding:14px 20px;
+    border-radius:999px;
+    border:1.5px solid var(--border-2);
+    background:var(--surface);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .18s ease,box-shadow .18s ease,background-color .3s ease,color .3s ease;
+  }
+  .notify input::placeholder{color:var(--placeholder)}
+  .notify input:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 4px rgba(31,111,224,.12);
+  }
+  .btn{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:1rem;
+    padding:14px 30px;
+    border-radius:999px;
+    border:none;
+    cursor:pointer;
+    color:#fff;
+    background:linear-gradient(135deg,var(--blue) 0%,var(--blue-deep) 100%);
+    box-shadow:var(--shadow-btn);
+    transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(31,111,224,.3)}
+  .btn:focus-visible{outline:3px solid rgba(31,111,224,.4);outline-offset:2px}
+
+  .notify-msg{
+    margin-top:14px;
+    font-size:.9rem;
+    font-weight:500;
+    color:var(--green);
+    min-height:1.2em;
+  }
+
+  .trust{
+    margin-top:30px;
+    font-size:.83rem;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .trust svg{width:14px;height:14px;flex:none}
+  .trust svg path{stroke:var(--green)}
+
+  @media (max-width:560px){
+    .hero{padding-top:110px;padding-bottom:140px}
+    .notify{flex-direction:column}
+    .notify input,.btn{width:100%}
+    .count-card{min-width:72px}
+    .top-controls{top:14px;inset-inline-end:14px;gap:8px}
+    .lang-switch button{padding:6px 14px;font-size:.82rem}
+    .theme-switch{width:40px;height:40px}
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top controls: language switcher + theme toggle -->
+  <div class="top-controls">
+    <div class="lang-switch" role="group" aria-label="Language selection / اختيار اللغة">
+      <button type="button" id="btn-en" class="active" onclick="setLang('en')">English</button>
+      <button type="button" id="btn-ar" onclick="setLang('ar')">العربية</button>
+    </div>
+    <button type="button" class="theme-switch" id="theme-btn" onclick="toggleTheme()" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle light / dark mode">
+      <!-- Sun icon (shown in light mode) -->
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="4.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2.5v2.4M12 19.1v2.4M21.5 12h-2.4M4.9 12H2.5M18.7 5.3l-1.7 1.7M7 17l-1.7 1.7M18.7 18.7L17 17M7 7L5.3 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <!-- Moon icon (shown in dark mode) -->
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="wash wash--blue"></div>
+  <div class="wash wash--green"></div>
+
+  <!-- Background dashboard / ledger illustration -->
+  <div class="bg-illustration" aria-hidden="true">
+    <svg viewBox="0 0 880 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="cardFade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--svg-card-top)"/>
+          <stop offset="1" stop-color="var(--svg-card-bottom)"/>
+        </linearGradient>
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--blue)"/>
+          <stop offset="1" stop-color="var(--green)"/>
+        </linearGradient>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--blue)" stop-opacity=".14"/>
+          <stop offset="1" stop-color="var(--green)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="160" y="40" width="560" height="360" rx="20" fill="url(#cardFade)" stroke="var(--border)"/>
+      <rect x="190" y="70" width="120" height="12" rx="6" fill="var(--svg-line)"/>
+      <circle cx="690" cy="76" r="10" fill="var(--green-soft)"/>
+      <circle cx="662" cy="76" r="10" fill="var(--blue-soft)"/>
+
+      <path d="M190 250 C 250 230, 290 180, 340 190 S 430 150, 480 140 S 580 120, 640 95 L 690 88 L 690 300 L 190 300 Z" fill="url(#areaGrad)"/>
+      <path d="M190 250 C 250 230, 290 180, 340 190 S 430 150, 480 140 S 580 120, 640 95 L 690 88" stroke="url(#lineGrad)" stroke-width="3.5" stroke-linecap="round"/>
+      <circle cx="480" cy="140" r="6" fill="var(--surface)" stroke="var(--blue)" stroke-width="3"/>
+
+      <g>
+        <rect x="190" y="320" width="220" height="10" rx="5" fill="var(--border)"/>
+        <rect x="190" y="344" width="170" height="10" rx="5" fill="var(--blue-soft)"/>
+        <rect x="190" y="368" width="200" height="10" rx="5" fill="var(--green-soft)"/>
+        <rect x="610" y="320" width="80" height="10" rx="5" fill="var(--green)" opacity=".35"/>
+        <rect x="630" y="344" width="60" height="10" rx="5" fill="var(--blue)" opacity=".3"/>
+        <rect x="600" y="368" width="90" height="10" rx="5" fill="var(--green)" opacity=".25"/>
+      </g>
+
+      <g>
+        <rect x="60" y="150" width="170" height="120" rx="16" fill="var(--surface)" stroke="var(--border)"/>
+        <rect x="80" y="172" width="70" height="9" rx="4.5" fill="var(--svg-line)"/>
+        <rect x="80" y="194" width="120" height="8" rx="4" fill="var(--svg-line-soft)"/>
+        <rect x="80" y="212" width="100" height="8" rx="4" fill="var(--svg-line-soft)"/>
+        <rect x="80" y="238" width="56" height="14" rx="7" fill="var(--green-soft)"/>
+        <circle cx="206" cy="178" r="9" fill="var(--green)" opacity=".18"/>
+        <path d="M202 178 l3 3 l5 -6" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </g>
+
+      <g>
+        <rect x="660" y="180" width="170" height="110" rx="16" fill="var(--surface)" stroke="var(--border)"/>
+        <rect x="680" y="202" width="60" height="9" rx="4.5" fill="var(--svg-line)"/>
+        <rect x="680" y="224" width="96" height="14" rx="7" fill="var(--blue)" opacity=".2"/>
+        <rect x="680" y="252" width="40" height="9" rx="4.5" fill="var(--green-soft)"/>
+        <rect x="728" y="252" width="40" height="9" rx="4.5" fill="var(--blue-soft)"/>
+      </g>
+    </svg>
+  </div>
+
+  <main class="hero">
+    <div class="logo">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 19 V10 M10 19 V6 M15 19 V12 M20 19 V8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="logo-name">Recko<span>Books</span></div>
+    </div>
+
+    <div class="badge"><span class="badge-dot"></span><span data-i18n="badge">Coming Soon</span></div>
+
+    <h1 class="tagline" id="tagline"><span class="slogan-rotator"><span class="slogan-text" id="slogan-text">Smart Accounting.</span><span class="slogan-cursor" aria-hidden="true"></span></span><br><span class="accent" id="tagline-accent">Almost here.</span></h1>
+
+    <p class="description" data-i18n="description">We're putting the finishing touches on ReckoBooks — a simpler way to manage your books, invoices, and reports. Be the first to know when we launch.</p>
+
+    <div class="countdown" id="countdown" aria-label="Time until launch">
+      <div class="count-card"><div class="count-num" id="cd-days">--</div><div class="count-label" data-i18n="days">Days</div></div>
+      <div class="count-card"><div class="count-num" id="cd-hours">--</div><div class="count-label" data-i18n="hours">Hours</div></div>
+      <div class="count-card"><div class="count-num" id="cd-mins">--</div><div class="count-label" data-i18n="minutes">Minutes</div></div>
+      <div class="count-card"><div class="count-num" id="cd-secs">--</div><div class="count-label" data-i18n="seconds">Seconds</div></div>
+    </div>
+
+    <div class="notify">
+      <input type="email" id="email" placeholder="Enter your email address" aria-label="Email address">
+      <button class="btn" type="button" id="notify-btn" onclick="notifyMe()">Notify Me</button>
+    </div>
+    <p class="notify-msg" id="notify-msg"></p>
+
+    <p class="trust">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" stroke="#16A57F" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9 12l2 2 4-4" stroke="#16A57F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span data-i18n="trust">No spam — just one email when we launch</span>
+    </p>
+  </main>
+
+<script>
+  /* ============ TRANSLATIONS ============ */
+  const i18n = {
+    en: {
+      htmlLang: 'en',
+      dir: 'ltr',
+      pageTitle: 'ReckoBooks — Coming Soon',
+      badge: 'Coming Soon',
+      slogans: [
+        'Smart Accounting.',
+        'Simplify Your Numbers.',
+        'Your Books, Smarter.',
+        'Accounting. Automated.',
+        'Where Accuracy Meets Simplicity.',
+        'Count Less, Achieve More.',
+        'Smart Finance Starts Here.',
+        'Effortless Accounting for Everyone.',
+        'Clarity in Every Transaction.',
+        'Your Digital Accounting Partner.',
+        'Accounting Made Effortless.',
+        'Clean Books. Clear Decisions.',
+        'Your Finance. Fully Simplified.',
+        'Smart Tools for Smart Business.'
+      ],
+      taglineAccent: 'Almost here.',
+      description: "We're putting the finishing touches on ReckoBooks — a simpler way to manage your books, invoices, and reports. Be the first to know when we launch.",
+      days: 'Days',
+      hours: 'Hours',
+      minutes: 'Minutes',
+      seconds: 'Seconds',
+      placeholder: 'Enter your email address',
+      emailAria: 'Email address',
+      notifyBtn: 'Notify Me',
+      msgInvalid: 'Enter a valid email address to get notified.',
+      msgSuccess: "You're on the list — we'll email you at launch.",
+      trust: 'No spam — just one email when we launch',
+      countdownAria: 'Time until launch',
+      themeToDark: 'Switch to dark mode',
+      themeToLight: 'Switch to light mode'
+    },
+    ar: {
+      htmlLang: 'ar',
+      dir: 'rtl',
+      pageTitle: 'ريكوبوكس — قريباً',
+      badge: 'قريباً',
+      slogans: [
+        'محاسبة ذكية.',
+        'بسّط أرقامك.',
+        'دفاترك، بذكاء أكبر.',
+        'محاسبة. مؤتمتة.',
+        'حيث تلتقي الدقة بالبساطة.',
+        'احسب أقل، أنجز أكثر.',
+        'التمويل الذكي يبدأ هنا.',
+        'محاسبة سهلة للجميع.',
+        'وضوح في كل معاملة.',
+        'شريكك المحاسبي الرقمي.',
+        'المحاسبة أصبحت سهلة.',
+        'دفاتر نظيفة. قرارات واضحة.',
+        'أموالك. ببساطة تامة.',
+        'أدوات ذكية لأعمال ذكية.'
+      ],
+      taglineAccent: 'على وشك الوصول.',
+      description: 'نضع اللمسات الأخيرة على ريكوبوكس — طريقة أبسط لإدارة دفاترك وفواتيرك وتقاريرك. كن أول من يعلم عند الإطلاق.',
+      days: 'يوم',
+      hours: 'ساعة',
+      minutes: 'دقيقة',
+      seconds: 'ثانية',
+      placeholder: 'أدخل بريدك الإلكتروني',
+      emailAria: 'البريد الإلكتروني',
+      notifyBtn: 'أعلمني',
+      msgInvalid: 'يرجى إدخال بريد إلكتروني صحيح ليتم إشعارك.',
+      msgSuccess: 'تمت إضافتك إلى القائمة — سنراسلك عبر البريد عند الإطلاق.',
+      trust: 'لا رسائل مزعجة — بريد واحد فقط عند الإطلاق',
+      countdownAria: 'الوقت المتبقي حتى الإطلاق',
+      themeToDark: 'التبديل إلى الوضع الداكن',
+      themeToLight: 'التبديل إلى الوضع الفاتح'
+    }
+  };
+
+  let currentLang = 'en';
+  // Remember the visitor's last choice (safe if storage is unavailable)
+  try {
+    const saved = localStorage.getItem('reckobooks-lang');
+    if (saved === 'ar' || saved === 'en') currentLang = saved;
+  } catch (e) {}
+
+  /* ============ ROTATING SLOGAN (TYPEWRITER) ============ */
+  let sloganTimer = null;     // current pending timeout
+  let sloganSession = 0;      // invalidates old loops on language switch
+
+  const TYPE_SPEED   = 65;    // ms per character while typing
+  const DELETE_SPEED = 35;    // ms per character while deleting
+  const HOLD_FULL    = 2200;  // pause with full slogan shown
+  const HOLD_EMPTY   = 400;   // pause before typing the next one
+
+  function startSloganRotation(slogans){
+    const el = document.getElementById('slogan-text');
+    sloganSession++;
+    const session = sloganSession;
+    if (sloganTimer) clearTimeout(sloganTimer);
+
+    let index = 0;      // which slogan
+    let pos = 0;        // how many characters currently shown
+    let deleting = false;
+
+    el.textContent = '';
+
+    function tick(){
+      if (session !== sloganSession) return; // language changed — stop this loop
+      const word = slogans[index];
+
+      if (!deleting){
+        pos++;
+        el.textContent = word.slice(0, pos);
+        if (pos === word.length){
+          deleting = true;
+          sloganTimer = setTimeout(tick, HOLD_FULL);
+        } else {
+          sloganTimer = setTimeout(tick, TYPE_SPEED);
+        }
+      } else {
+        pos--;
+        el.textContent = word.slice(0, pos);
+        if (pos === 0){
+          deleting = false;
+          index = (index + 1) % slogans.length;
+          sloganTimer = setTimeout(tick, HOLD_EMPTY);
+        } else {
+          sloganTimer = setTimeout(tick, DELETE_SPEED);
+        }
+      }
+    }
+
+    sloganTimer = setTimeout(tick, HOLD_EMPTY);
+  }
+
+  function setLang(lang){
+    currentLang = lang;
+    const t = i18n[lang];
+
+    document.documentElement.lang = t.htmlLang;
+    document.documentElement.dir = t.dir;
+    document.title = t.pageTitle;
+
+    // simple text nodes
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = t[el.dataset.i18n];
+    });
+
+    // tagline: rotating slogan + accent line
+    document.getElementById('tagline-accent').textContent = t.taglineAccent;
+    startSloganRotation(t.slogans);
+
+    // form bits
+    const email = document.getElementById('email');
+    email.placeholder = t.placeholder;
+    email.setAttribute('aria-label', t.emailAria);
+    document.getElementById('notify-btn').textContent = t.notifyBtn;
+    document.getElementById('countdown').setAttribute('aria-label', t.countdownAria);
+
+    // clear any previous status message (it was in the old language)
+    document.getElementById('notify-msg').textContent = '';
+
+    // toggle button states
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.getElementById('btn-ar').classList.toggle('active', lang === 'ar');
+
+    // refresh theme button label in the new language
+    updateThemeButtonLabel();
+
+    try { localStorage.setItem('reckobooks-lang', lang); } catch (e) {}
+  }
+
+  /* ============ LIGHT / DARK THEME ============ */
+  let currentTheme = 'light';
+
+  // 1) use saved choice if any, otherwise 2) follow the system preference
+  try {
+    const savedTheme = localStorage.getItem('reckobooks-theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      currentTheme = savedTheme;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      currentTheme = 'dark';
+    }
+  } catch (e) {}
+
+  function updateThemeButtonLabel(){
+    const t = i18n[currentLang];
+    const btn = document.getElementById('theme-btn');
+    const label = currentTheme === 'dark' ? t.themeToLight : t.themeToDark;
+    btn.setAttribute('aria-label', label);
+    btn.setAttribute('title', label);
+    btn.setAttribute('aria-pressed', currentTheme === 'dark' ? 'true' : 'false');
+  }
+
+  function setTheme(theme){
+    currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    updateThemeButtonLabel();
+    try { localStorage.setItem('reckobooks-theme', theme); } catch (e) {}
+  }
+
+  function toggleTheme(){
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  }
+
+  // follow live system changes only if the visitor hasn't chosen manually
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      let hasManualChoice = false;
+      try { hasManualChoice = !!localStorage.getItem('reckobooks-theme'); } catch (err) {}
+      if (!hasManualChoice) {
+        currentTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeButtonLabel();
+      }
+    });
+  }
+
+  /* ============ COUNTDOWN ============ */
+  // Set your launch date here (year, month-1, day, hour, minute)
+  const launchDate = new Date(2026, 8, 1, 9, 0, 0); // 1 September 2026, 09:00
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function tick(){
+    const now = new Date();
+    let diff = Math.max(0, launchDate - now);
+    const days  = Math.floor(diff / 864e5);
+    const hours = Math.floor(diff % 864e5 / 36e5);
+    const mins  = Math.floor(diff % 36e5 / 6e4);
+    const secs  = Math.floor(diff % 6e4 / 1e3);
+    document.getElementById('cd-days').textContent  = pad(days);
+    document.getElementById('cd-hours').textContent = pad(hours);
+    document.getElementById('cd-mins').textContent  = pad(mins);
+    document.getElementById('cd-secs').textContent  = pad(secs);
+  }
+
+  /* ============ NOTIFY FORM ============ */
+  function notifyMe(){
+    const t = i18n[currentLang];
+    const input = document.getElementById('email');
+    const msg = document.getElementById('notify-msg');
+    const email = input.value.trim();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if(!valid){
+      msg.style.color = 'var(--error)';
+      msg.textContent = t.msgInvalid;
+      return;
+    }
+    msg.style.color = 'var(--green)';
+    msg.textContent = t.msgSuccess;
+    input.value = '';
+    // Hook this up to your mailing list / backend endpoint when ready.
+  }
+
+  document.getElementById('email').addEventListener('keydown', e => {
+    if(e.key === 'Enter') notifyMe();
+  });
+
+  /* ============ INIT ============ */
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  setLang(currentLang);
+  tick();
+  setInterval(tick, 1000);
+</script>
+
+</body>
+</html>
